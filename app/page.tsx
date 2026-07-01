@@ -1,8 +1,42 @@
+import {
+  ArrowRight,
+  CheckCircle2,
+  MessageCircle,
+  PackageCheck,
+  Ruler,
+  ShoppingBag,
+  Shirt,
+  Truck
+} from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, MessageCircle, PackageCheck, Ruler, Shirt, Truck } from "lucide-react";
+import { ShirtScrollHero } from "@/components/home/shirt-scroll-hero";
 import { ProductCard } from "@/components/product/product-card";
+import { AnimatedButton } from "@/components/ui/animated-button";
+import { FadeIn } from "@/components/ui/fade-in";
 import { getProductsData, getSettingsData } from "@/lib/data";
+
+const benefits = [
+  {
+    icon: Shirt,
+    title: "Menudeo",
+    text: "Compra piezas individuales sin complicar el pedido."
+  },
+  {
+    icon: PackageCheck,
+    title: "Mayoreo",
+    text: "Precio especial automatico al llegar a la cantidad minima."
+  },
+  {
+    icon: Ruler,
+    title: "Variantes",
+    text: "Tallas, colores y stock visibles antes de confirmar."
+  },
+  {
+    icon: Truck,
+    title: "Entrega",
+    text: "Metodo de entrega y notas incluidos en el pedido."
+  }
+];
 
 export default async function HomePage() {
   const [products, settings] = await Promise.all([
@@ -16,140 +50,168 @@ export default async function HomePage() {
 
   return (
     <main>
-      <section className="relative overflow-hidden bg-white">
-        <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-          <div className="max-w-xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--blue)]">
-              Camisas al menudeo y mayoreo
-            </p>
-            <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-normal sm:text-5xl lg:text-6xl">
-              La Linea
-            </h1>
-            <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-              Catalogo claro, precios por volumen y pedidos rapidos por WhatsApp
-              para surtir desde una pieza hasta paquetes completos.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/catalogo"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-6 text-sm font-semibold text-white transition hover:bg-[#1F2937]"
-              >
-                Ver catalogo <ArrowRight size={18} />
-              </Link>
-              <Link
-                href={whatsappHref}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-[var(--primary)] px-6 text-sm font-semibold text-[var(--primary)] transition hover:bg-[#F3F4F6]"
-              >
-                <MessageCircle size={18} /> Comprar por WhatsApp
-              </Link>
+      <ShirtScrollHero whatsappHref={whatsappHref} />
+
+      <section id="nosotros" className="relative overflow-hidden bg-white py-20 sm:py-28">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+          <FadeIn>
+            <div className="relative">
+              <div
+                aria-hidden
+                className="float-slow absolute -left-8 -top-8 -z-10 h-40 w-40 rounded-full bg-[var(--blue)]/15 blur-3xl"
+              />
+              <div
+                aria-hidden
+                className="float-slow-delay absolute -bottom-8 -right-8 -z-10 h-48 w-48 rounded-full bg-[var(--red)]/15 blur-3xl"
+              />
+              <div className="relative min-h-[320px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 lg:min-h-[420px]">
+                <Image
+                  src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1200&q=80"
+                  alt="Equipo La Linea"
+                  fill
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
             </div>
-          </div>
-          <div className="relative min-h-[420px] overflow-hidden rounded-lg bg-[#E5E7EB] lg:min-h-[560px]">
-            <Image
-              src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1400&q=80"
-              alt="Camisas modernas La Linea"
-              fill
-              priority
-              sizes="(min-width: 1024px) 55vw, 100vw"
-              className="object-cover"
-            />
-            <div className="absolute bottom-5 left-5 right-5 rounded-lg bg-white/92 p-4 backdrop-blur">
-              <p className="text-sm font-semibold">Mayoreo desde pocas piezas</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Selecciona talla, color y cantidad; el precio se calcula solo.
-              </p>
-            </div>
-          </div>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <div className="mb-4 h-1.5 w-16 rounded-full bg-[var(--blue)]" />
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+              Nosotros
+            </p>
+            <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+              Camisas hechas para vender rapido
+            </h2>
+            <p className="mt-4 text-base leading-7 text-[var(--muted)]">
+              La Linea nace para surtir a comerciantes y clientes finales con
+              catalogo claro, tallas y colores disponibles y precios que se
+              ajustan solos segun la cantidad. Sin intermediarios ni procesos
+              complicados: el pedido se arma y se confirma por WhatsApp.
+            </p>
+            <ul className="mt-6 grid gap-3">
+              {[
+                "Catalogo actualizado con tallas, colores y stock reales",
+                "Precios por volumen calculados de forma automatica",
+                "Atencion directa y pedidos confirmados por WhatsApp"
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-[var(--foreground)]">
+                  <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-[var(--blue)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </FadeIn>
         </div>
       </section>
 
-      <section className="bg-[var(--background)] py-16">
+      <section id="tienda" className="bg-[var(--background)]">
+        <FadeIn className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative flex flex-col items-center overflow-hidden rounded-2xl border border-dashed border-black/15 bg-white px-4 py-6 text-center">
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,var(--red)_0%,transparent_60%)] opacity-10"
+            />
+            <div className="float-slow grid h-16 w-16 place-items-center rounded-full bg-[var(--red)]/10">
+              <ShoppingBag size={26} className="text-[var(--red)]" />
+            </div>
+            <p className="mt-5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+              Tienda
+            </p>
+            <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+              Proximamente
+            </h2>
+          </div>
+        </FadeIn>
+      </section>
+
+      <section className="bg-[var(--background)] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <FadeIn className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
+              <div className="mb-4 h-1.5 w-16 rounded-full bg-[var(--blue)]" />
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                 Destacados
               </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-normal">
+              <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
                 Productos listos para vender
               </h2>
             </div>
-            <Link
-              href="/catalogo"
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-4 text-sm font-semibold"
-            >
+            <AnimatedButton href="/catalogo" variant="outline" className="h-11 px-5">
               Ver todo <ArrowRight size={17} />
-            </Link>
-          </div>
+            </AnimatedButton>
+          </FadeIn>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {featured.map((product, index) => (
+              <FadeIn key={product.id} delay={index * 0.1}>
+                <ProductCard product={product} />
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="mayoreo" className="bg-white py-16">
+      <section id="mayoreo" className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-5 md:grid-cols-4">
-            {[
-              {
-                icon: Shirt,
-                title: "Menudeo",
-                text: "Compra piezas individuales sin complicar el pedido."
-              },
-              {
-                icon: PackageCheck,
-                title: "Mayoreo",
-                text: "Precio especial automatico al llegar a la cantidad minima."
-              },
-              {
-                icon: Ruler,
-                title: "Variantes",
-                text: "Tallas, colores y stock visibles antes de confirmar."
-              },
-              {
-                icon: Truck,
-                title: "Entrega",
-                text: "Metodo de entrega y notas incluidos en el pedido."
-              }
-            ].map((benefit) => (
-              <div
-                key={benefit.title}
-                className="rounded-lg border border-[var(--border)] bg-white p-5"
-              >
-                <benefit.icon size={24} className="text-[var(--blue)]" />
-                <h3 className="mt-4 font-semibold">{benefit.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                  {benefit.text}
-                </p>
-              </div>
+          <FadeIn>
+            <div className="mb-4 h-1.5 w-16 rounded-full bg-[var(--red)]" />
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+              Compra a tu manera
+            </h2>
+          </FadeIn>
+          <div className="mt-8 grid gap-5 md:grid-cols-4">
+            {benefits.map((benefit, index) => (
+              <FadeIn key={benefit.title} delay={index * 0.08}>
+                <div className="group relative h-full overflow-hidden rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:rotate-1 hover:border-transparent hover:shadow-2xl">
+                  <div
+                    aria-hidden
+                    className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-[var(--red)] transition-transform duration-300 group-hover:scale-x-100"
+                  />
+                  <div className="grid h-11 w-11 place-items-center rounded-full bg-[var(--blue)]/10 text-[var(--blue)] transition-all duration-300 group-hover:-rotate-6 group-hover:bg-[var(--red)] group-hover:text-white">
+                    <benefit.icon size={22} />
+                  </div>
+                  <h3 className="mt-4 font-semibold">{benefit.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                    {benefit.text}
+                  </p>
+                </div>
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="contacto" className="bg-[var(--primary)] py-16 text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#C8A96A]">
-              Como comprar
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-normal">
-              Elige, agrega al carrito y confirma por WhatsApp
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-gray-300">
-              El pedido queda con productos, cantidades, variantes y total para
-              que la conversacion empiece ordenada.
-            </p>
+      <section id="contacto" className="relative overflow-hidden bg-white py-20 sm:py-28">
+        <div
+          aria-hidden
+          className="float-slow absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#25D366]/10 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="float-slow-delay absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#25D366]/10 blur-3xl"
+        />
+        <FadeIn className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366]">
+                <MessageCircle size={22} className="text-white" />
+              </div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#25D366]">
+                Como comprar
+              </p>
+              <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+                Elige, agrega al carrito y confirma por WhatsApp
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                El pedido queda con productos, cantidades, variantes y total para
+                que la conversacion empiece ordenada, lista para mandarse por WhatsApp.
+              </p>
+            </div>
+            <AnimatedButton href="/checkout" variant="whatsapp">
+              <MessageCircle size={18} /> Preparar pedido por WhatsApp
+            </AnimatedButton>
           </div>
-          <Link
-            href="/checkout"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-[var(--primary)]"
-          >
-            Preparar pedido <ArrowRight size={18} />
-          </Link>
-        </div>
+        </FadeIn>
       </section>
     </main>
   );

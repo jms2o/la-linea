@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { AnimatedButton } from "@/components/ui/animated-button";
 import { formatCurrency } from "@/lib/format";
 import type { ProductDTO } from "@/types";
 
@@ -8,7 +9,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
   const image = product.images[0];
 
   return (
-    <article className="group overflow-hidden rounded-lg border border-[var(--border)] bg-white">
+    <article className="group overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm transition-all duration-300 hover:border-transparent hover:shadow-2xl">
       <Link href={`/producto/${product.slug}`} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-[#E5E7EB]">
           {image ? (
@@ -25,7 +26,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+            <p className="inline-block rounded-full bg-[var(--blue)]/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--blue)]">
               {product.category.name}
             </p>
             <h3 className="mt-2 text-base font-semibold">{product.name}</h3>
@@ -47,12 +48,9 @@ export function ProductCard({ product }: { product: ProductDTO }) {
             Mayoreo desde {product.wholesaleMinQuantity} piezas
           </p>
         </div>
-        <Link
-          href={`/producto/${product.slug}`}
-          className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white transition hover:bg-[#1F2937]"
-        >
+        <AnimatedButton href={`/producto/${product.slug}`} className="mt-5 h-11 w-full rounded-xl">
           Ver producto <ArrowRight size={17} />
-        </Link>
+        </AnimatedButton>
       </div>
     </article>
   );
