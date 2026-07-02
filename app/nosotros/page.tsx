@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { CheckCircle2, MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { CheckCircle2, Eye, MapPin, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { FadeIn } from "@/components/ui/fade-in";
 import { HoverScale } from "@/components/ui/hover-scale";
 import { IconWiggle } from "@/components/ui/icon-wiggle";
@@ -33,6 +33,19 @@ const values = [
     icon: MapPin,
     title: "Raices en Mazatlan",
     text: "Somos una tienda local que crece llevando ropa de calidad a mas clientes."
+  }
+];
+
+const pillars = [
+  {
+    icon: Target,
+    title: "Mision",
+    text: "Ofrecer ropa de excelente calidad a precios justos, con catalogo claro y atencion directa, para que comerciantes y clientes finales compren con confianza."
+  },
+  {
+    icon: Eye,
+    title: "Vision",
+    text: "Ser la tienda de referencia en Mazatlan para quienes buscan calidad y variedad, creciendo sin perder la cercania y la atencion personalizada de siempre."
   }
 ];
 
@@ -127,6 +140,34 @@ export default function NosotrosPage() {
                   </IconWiggle>
                   <h3 className="mt-4 font-semibold">{value.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{value.text}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-white py-16 sm:py-20">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <FadeIn>
+            <div className="mb-4 h-1.5 w-16 rounded-full bg-[var(--blue)]" />
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Mision y vision
+            </h2>
+          </FadeIn>
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
+            {pillars.map((pillar, index) => (
+              <FadeIn key={pillar.title} delay={index * 0.08}>
+                <div className="group relative h-full overflow-hidden rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                  <div
+                    aria-hidden
+                    className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-[var(--red)] transition-transform duration-300 group-hover:scale-x-100"
+                  />
+                  <IconWiggle className="grid h-11 w-11 place-items-center rounded-full bg-[var(--blue)]/10 text-[var(--blue)] transition-colors duration-300 group-hover:bg-[var(--red)] group-hover:text-white">
+                    <pillar.icon size={22} />
+                  </IconWiggle>
+                  <h3 className="mt-4 text-lg font-semibold">{pillar.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{pillar.text}</p>
                 </div>
               </FadeIn>
             ))}

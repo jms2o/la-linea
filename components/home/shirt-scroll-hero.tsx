@@ -115,7 +115,7 @@ export function ShirtScrollHero({ whatsappHref }: ShirtScrollHeroProps) {
   const textX = useTransform(scrollYProgress, [0, 0.32], [-30, 0]);
 
   return (
-    <section ref={containerRef} id="inicio" className="relative h-[220vh] bg-white">
+    <section ref={containerRef} id="inicio" className="relative h-[460vh] bg-white">
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         <div
           aria-hidden
