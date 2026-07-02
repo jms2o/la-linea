@@ -5,11 +5,23 @@ import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AddToCartButton } from "@/components/product/add-to-cart-button";
+import { ProductSpinViewer } from "@/components/product/product-spin-viewer";
 import { QuantitySelector } from "@/components/cart/quantity-selector";
 import { calculateLineSubtotal, calculateUnitPrice } from "@/lib/pricing";
 import { formatCurrency } from "@/lib/format";
+import { getProductSpinColor } from "@/lib/product-spin";
+import { cn } from "@/lib/utils";
 import { buildWhatsAppOrderMessage, buildWhatsAppOrderUrl } from "@/lib/whatsapp";
 import type { ProductDTO, StoreSettingDTO } from "@/types";
+
+const DETAIL_IMAGE_LABELS = [
+  "Principal",
+  "Tela",
+  "Costuras",
+  "Detalle",
+  "Etiqueta",
+  "Empaque"
+];
 
 export function ProductDetail({
   product,
@@ -27,6 +39,7 @@ export function ProductDetail({
   const subtotal = calculateLineSubtotal(unitPrice, quantity);
   const reachedWholesale = quantity >= product.wholesaleMinQuantity;
   const neededForWholesale = Math.max(product.wholesaleMinQuantity - quantity, 0);
+  const spinColor = getProductSpinColor(product.name, variant?.color);
 
   const whatsappUrl = useMemo(() => {
     if (!settings.whatsappNumber || !variant) {
@@ -68,26 +81,45 @@ export function ProductDetail({
             />
           ) : null}
         </div>
-        {product.images.length > 1 ? (
-          <div className="mt-4 grid grid-cols-4 gap-3">
-            {product.images.map((image) => (
-              <button
-                key={image.id}
-                type="button"
-                className="relative aspect-square overflow-hidden rounded-lg border border-[var(--border)]"
-                onClick={() => setSelectedImage(image.url)}
-              >
-                <Image
-                  src={image.url}
-                  alt={image.alt ?? product.name}
-                  fill
-                  sizes="120px"
-                  className="object-cover"
-                />
-              </button>
-            ))}
+        <div className="mt-3 grid grid-cols-[10rem_1fr] gap-3 sm:grid-cols-[11rem_1fr]">
+          <div className="h-40 w-40 overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm sm:h-44 sm:w-44">
+            <ProductSpinViewer
+              productName={product.name}
+              color={spinColor}
+              compact
+              thumbnail
+            />
           </div>
-        ) : null}
+          {product.images.length ? (
+            <div className="grid content-start grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+              {product.images.map((image, index) => (
+                <button
+                  key={image.id}
+                  type="button"
+                  className={cn(
+                    "relative aspect-square overflow-hidden rounded-lg border bg-white transition hover:border-[var(--primary)]",
+                    selectedImage === image.url
+                      ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/15"
+                      : "border-[var(--border)]"
+                  )}
+                  onClick={() => setSelectedImage(image.url)}
+                  aria-label={`Ver ${getDetailImageLabel(index, image.alt)} de ${product.name}`}
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.alt ?? product.name}
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                  />
+                  <span className="absolute bottom-1 left-1 max-w-[calc(100%-0.5rem)] truncate rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--foreground)] shadow-sm">
+                    {getDetailImageLabel(index, image.alt)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <section>
@@ -175,4 +207,14 @@ export function ProductDetail({
       </section>
     </div>
   );
+}
+
+function getDetailImageLabel(index: number, alt?: string | null) {
+  const source = alt?.toLowerCase() ?? "";
+
+  if (source.includes("tela") || source.includes("textura")) return "Tela";
+  if (source.includes("costura") || source.includes("seam")) return "Costuras";
+  if (source.includes("etiqueta") || source.includes("label")) return "Etiqueta";
+
+  return DETAIL_IMAGE_LABELS[index] ?? `Foto ${index + 1}`;
 }

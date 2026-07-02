@@ -1,28 +1,30 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/animated-button";
+import { ProductSpinViewer } from "@/components/product/product-spin-viewer";
 import { formatCurrency } from "@/lib/format";
+import { getProductSpinColor } from "@/lib/product-spin";
 import type { ProductDTO } from "@/types";
 
 export function ProductCard({ product }: { product: ProductDTO }) {
-  const image = product.images[0];
+  const firstVariantColor = product.variants[0]?.color;
+  const spinColor = getProductSpinColor(product.name, firstVariantColor);
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm transition-all duration-300 hover:border-transparent hover:shadow-2xl">
-      <Link href={`/producto/${product.slug}`} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#E5E7EB]">
-          {image ? (
-            <Image
-              src={image.url}
-              alt={image.alt ?? product.name}
-              fill
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition duration-500 group-hover:scale-105"
-            />
-          ) : null}
-        </div>
-      </Link>
+      <div className="relative aspect-[4/5] overflow-hidden">
+        <ProductSpinViewer
+          productName={product.name}
+          color={spinColor}
+          compact
+          className="transition duration-500 group-hover:scale-[1.015]"
+        />
+        <Link
+          href={`/producto/${product.slug}`}
+          aria-label={`Ver detalle de ${product.name}`}
+          className="absolute inset-x-0 bottom-0 h-20"
+        />
+      </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
