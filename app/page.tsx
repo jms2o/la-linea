@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  CheckCircle2,
   MessageCircle,
   PackageCheck,
   Ruler,
@@ -10,10 +9,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { ShirtScrollHero } from "@/components/home/shirt-scroll-hero";
-import { ProductCard } from "@/components/product/product-card";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { FadeIn } from "@/components/ui/fade-in";
-import { getProductsData, getSettingsData } from "@/lib/data";
+import { getSettingsData } from "@/lib/data";
 
 const benefits = [
   {
@@ -39,11 +37,7 @@ const benefits = [
 ];
 
 export default async function HomePage() {
-  const [products, settings] = await Promise.all([
-    getProductsData({ activeOnly: true }),
-    getSettingsData()
-  ]);
-  const featured = products.slice(0, 3);
+  const settings = await getSettingsData();
   const whatsappHref = settings.whatsappNumber
     ? `https://wa.me/${settings.whatsappNumber.replace(/[^\d]/g, "")}`
     : "/checkout";
@@ -52,7 +46,7 @@ export default async function HomePage() {
     <main>
       <ShirtScrollHero whatsappHref={whatsappHref} />
 
-      <section id="nosotros" className="relative overflow-hidden bg-white py-20 sm:py-28">
+      <section className="relative overflow-hidden bg-white py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
           <FadeIn>
             <div className="relative">
@@ -81,33 +75,24 @@ export default async function HomePage() {
               Nosotros
             </p>
             <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
-              Camisas hechas para vender rapido
+              Ropa de excelente calidad desde Mazatlan
             </h2>
             <p className="mt-4 text-base leading-7 text-[var(--muted)]">
-              La Linea nace para surtir a comerciantes y clientes finales con
-              catalogo claro, tallas y colores disponibles y precios que se
-              ajustan solos segun la cantidad. Sin intermediarios ni procesos
-              complicados: el pedido se arma y se confirma por WhatsApp.
+              Somos una tienda de ropa en Mazatlan enfocada en calidad,
+              catalogo claro y precios que se ajustan segun la cantidad. Sin
+              intermediarios ni procesos complicados: el pedido se arma y se
+              confirma por WhatsApp.
             </p>
-            <ul className="mt-6 grid gap-3">
-              {[
-                "Catalogo actualizado con tallas, colores y stock reales",
-                "Precios por volumen calculados de forma automatica",
-                "Atencion directa y pedidos confirmados por WhatsApp"
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm text-[var(--foreground)]">
-                  <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-[var(--blue)]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <AnimatedButton href="/nosotros" variant="outline" className="mt-6 h-11 px-5">
+              Conocer mas <ArrowRight size={17} />
+            </AnimatedButton>
           </FadeIn>
         </div>
       </section>
 
-      <section id="tienda" className="bg-[var(--background)]">
+      <section className="bg-[var(--background)]">
         <FadeIn className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative flex flex-col items-center overflow-hidden rounded-2xl border border-dashed border-black/15 bg-white px-4 py-6 text-center">
+          <div className="relative flex flex-col items-center overflow-hidden rounded-2xl border border-dashed border-black/15 bg-white px-4 py-10 text-center">
             <div
               aria-hidden
               className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,var(--red)_0%,transparent_60%)] opacity-10"
@@ -116,39 +101,19 @@ export default async function HomePage() {
               <ShoppingBag size={26} className="text-[var(--red)]" />
             </div>
             <p className="mt-5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-              Tienda
+              Catalogo
             </p>
             <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
-              Proximamente
+              Descubre todas nuestras prendas
             </h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--muted)]">
+              Menudeo, mayoreo, tallas y colores disponibles en un solo lugar.
+            </p>
+            <AnimatedButton href="/catalogo" className="mt-6 h-11 px-6">
+              Ver catalogo <ArrowRight size={17} />
+            </AnimatedButton>
           </div>
         </FadeIn>
-      </section>
-
-      <section className="bg-[var(--background)] py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <FadeIn className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <div className="mb-4 h-1.5 w-16 rounded-full bg-[var(--blue)]" />
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                Destacados
-              </p>
-              <h2 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
-                Productos listos para vender
-              </h2>
-            </div>
-            <AnimatedButton href="/catalogo" variant="outline" className="h-11 px-5">
-              Ver todo <ArrowRight size={17} />
-            </AnimatedButton>
-          </FadeIn>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {featured.map((product, index) => (
-              <FadeIn key={product.id} delay={index * 0.1}>
-                <ProductCard product={product} />
-              </FadeIn>
-            ))}
-          </div>
-        </div>
       </section>
 
       <section id="mayoreo" className="bg-white py-20 sm:py-28">
@@ -181,7 +146,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="contacto" className="relative overflow-hidden bg-white py-20 sm:py-28">
+      <section id="como-comprar" className="relative overflow-hidden bg-white py-20 sm:py-28">
         <div
           aria-hidden
           className="float-slow absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#25D366]/10 blur-3xl"
@@ -206,6 +171,9 @@ export default async function HomePage() {
                 El pedido queda con productos, cantidades, variantes y total para
                 que la conversacion empiece ordenada, lista para mandarse por WhatsApp.
               </p>
+              <AnimatedButton href="/contacto" variant="outline" className="mt-5 h-11 px-5">
+                Ver datos de contacto <ArrowRight size={17} />
+              </AnimatedButton>
             </div>
             <AnimatedButton href="/checkout" variant="whatsapp">
               <MessageCircle size={18} /> Preparar pedido por WhatsApp

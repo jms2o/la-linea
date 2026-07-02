@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, SlidersHorizontal } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/product/product-card";
 import type { CategoryDTO, ProductDTO } from "@/types";
@@ -46,7 +47,12 @@ export function CatalogClient({
 
   return (
     <div>
-      <div className="grid gap-3 rounded-lg border border-[var(--border)] bg-white p-3 md:grid-cols-[1fr_220px_220px]">
+      <motion.div
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="grid gap-3 rounded-lg border border-[var(--border)] bg-white p-3 md:grid-cols-[1fr_220px_220px]"
+      >
         <label className="relative block">
           <Search
             size={18}
@@ -86,21 +92,39 @@ export function CatalogClient({
           <option value="price-asc">Menor precio</option>
           <option value="price-desc">Mayor precio</option>
         </select>
-      </div>
+      </motion.div>
 
       {filteredProducts.length ? (
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <motion.div layout className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                layout
+                initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ duration: 0.35, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -6 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       ) : (
-        <div className="mt-8 rounded-lg border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center">
+        <motion.div
+          key="empty"
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="mt-8 rounded-lg border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center"
+        >
           <p className="text-lg font-semibold">No hay productos para esta busqueda</p>
           <p className="mt-2 text-sm text-[var(--muted)]">
             Prueba con otra categoria o limpia el texto de busqueda.
           </p>
-        </div>
+        </motion.div>
       )}
     </div>
   );

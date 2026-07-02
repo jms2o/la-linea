@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CatalogClient } from "@/components/product/catalog-client";
+import { FadeIn } from "@/components/ui/fade-in";
 import { getCategoriesData, getProductsData } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -17,7 +18,8 @@ export default async function CatalogPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
+        <FadeIn className="max-w-2xl">
+          <div className="mb-4 h-1.5 w-16 rounded-full bg-[var(--blue)]" />
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
             Catalogo
           </p>
@@ -28,7 +30,7 @@ export default async function CatalogPage() {
             Filtra por categoria, busca por nombre y compara precio de menudeo
             contra mayoreo antes de elegir variantes.
           </p>
-        </div>
+        </FadeIn>
         <div className="mt-8">
           <CatalogClient products={products} categories={categories} />
         </div>

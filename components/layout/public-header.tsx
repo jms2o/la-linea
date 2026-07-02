@@ -10,10 +10,10 @@ import { useCart } from "@/components/cart/cart-provider";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/#inicio", label: "Inicio" },
-  { href: "/#nosotros", label: "Nosotros" },
-  { href: "/#tienda", label: "Tienda" },
-  { href: "/#contacto", label: "Contacto" },
+  { href: "/", label: "Inicio" },
+  { href: "/nosotros", label: "Nosotros" },
+  { href: "/catalogo", label: "Catalogo" },
+  { href: "/contacto", label: "Contacto" },
   { href: "/admin/dashboard", label: "Admin" }
 ];
 
@@ -23,7 +23,7 @@ export function PublicHeader() {
   const [cartOpen, setCartOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const { itemCount } = useCart();
-  const activeHref = pathname === "/" ? "/#inicio" : null;
+  const activeHref = pathname;
 
   return (
     <>
