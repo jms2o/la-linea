@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingCart, X } from "lucide-react";
+import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { useCart } from "@/components/cart/cart-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 import { cn } from "@/lib/utils";
 
-const links = [
+const baseLinks = [
   { href: "/", label: "Inicio" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/catalogo", label: "Catalogo" },
-  { href: "/contacto", label: "Contacto" },
-  { href: "/admin/dashboard", label: "Admin" }
+  { href: "/contacto", label: "Contacto" }
 ];
 
 export function PublicHeader() {
@@ -23,12 +23,23 @@ export function PublicHeader() {
   const [cartOpen, setCartOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const { itemCount } = useCart();
+  const { user } = useAuth();
   const activeHref = pathname;
+
+  const accountLink =
+    user?.kind === "admin"
+      ? { href: "/admin/dashboard", label: "Admin" }
+      : user?.kind === "customer"
+        ? { href: "/mi-cuenta", label: "Mi cuenta" }
+        : { href: `/login?next=${encodeURIComponent(pathname)}`, label: "Iniciar sesion" };
+
+  const links = baseLinks;
+  const isAuthPage = pathname === "/login";
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-black/10 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 md:grid md:grid-cols-[1fr_auto_1fr]">
           <Link href="/" className="text-lg font-semibold tracking-wide">
             La Linea
           </Link>
@@ -57,38 +68,52 @@ export function PublicHeader() {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
-            <motion.button
-              type="button"
-              aria-label="Abrir carrito de compras"
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative flex h-10 items-center gap-2 rounded-full border border-black/10 bg-white px-3 text-black transition-colors hover:border-black sm:px-4"
-              onClick={() => setCartOpen(true)}
-            >
-              <motion.span
-                whileHover={{ rotate: [0, -14, 12, -8, 0] }}
-                transition={{ duration: 0.5 }}
-                className="flex"
+          <div className="flex items-center gap-2 md:justify-self-end">
+            {!isAuthPage ? (
+              <motion.button
+                type="button"
+                aria-label="Abrir carrito de compras"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative flex h-10 items-center gap-2 rounded-full border border-black/10 bg-white px-3 text-black transition-colors hover:border-black sm:px-4"
+                onClick={() => setCartOpen(true)}
               >
-                <ShoppingCart size={19} />
-              </motion.span>
-              <span className="hidden text-sm font-semibold sm:inline">Carrito de compras</span>
-              <AnimatePresence>
-                {itemCount ? (
-                  <motion.span
-                    key={itemCount}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                    className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--red)] px-1 text-[11px] font-bold text-white"
-                  >
-                    {itemCount}
-                  </motion.span>
-                ) : null}
-              </AnimatePresence>
-            </motion.button>
+                <motion.span
+                  whileHover={{ rotate: [0, -14, 12, -8, 0] }}
+                  transition={{ duration: 0.5 }}
+                  className="flex"
+                >
+                  <ShoppingCart size={19} />
+                </motion.span>
+                <span className="hidden text-sm font-semibold sm:inline">Carrito de compras</span>
+                <AnimatePresence>
+                  {itemCount ? (
+                    <motion.span
+                      key={itemCount}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                      className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--red)] px-1 text-[11px] font-bold text-white"
+                    >
+                      {itemCount}
+                    </motion.span>
+                  ) : null}
+                </AnimatePresence>
+              </motion.button>
+            ) : null}
+            {!isAuthPage ? (
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href={accountLink.href}
+                  aria-label={accountLink.label}
+                  className="flex h-10 items-center gap-2 rounded-full border border-black/10 bg-white px-3 text-black transition-colors hover:border-black sm:px-4"
+                >
+                  <User size={19} />
+                  <span className="hidden text-sm font-semibold sm:inline">{accountLink.label}</span>
+                </Link>
+              </motion.div>
+            ) : null}
             <motion.button
               type="button"
               aria-label="Abrir menu"
@@ -129,6 +154,18 @@ export function PublicHeader() {
                     </Link>
                   </motion.div>
                 ))}
+                {!isAuthPage ? (
+                  <Link
+                    href={accountLink.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg px-2 py-2 transition-colors active:bg-black/5",
+                      activeHref === accountLink.href && "bg-black/5 font-semibold text-black"
+                    )}
+                  >
+                    <User size={16} /> {accountLink.label}
+                  </Link>
+                ) : null}
               </nav>
             </motion.div>
           ) : null}

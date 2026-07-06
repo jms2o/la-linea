@@ -28,9 +28,16 @@ const initialFields: CheckoutFields = {
   notes: ""
 };
 
-export function CheckoutForm() {
+type CheckoutFormProps = {
+  initialCustomer?: Partial<CheckoutFields>;
+};
+
+export function CheckoutForm({ initialCustomer }: CheckoutFormProps) {
   const cart = useCart();
-  const [fields, setFields] = useState(initialFields);
+  const [fields, setFields] = useState<CheckoutFields>({
+    ...initialFields,
+    ...initialCustomer
+  });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState("");
   const [order, setOrder] = useState<OrderDTO | null>(null);

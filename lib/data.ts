@@ -12,6 +12,7 @@ import {
 } from "@/lib/demo-data";
 import type {
   CategoryDTO,
+  CustomerDTO,
   OrderDTO,
   ProductDTO,
   ProductVariantDTO,
@@ -207,6 +208,20 @@ export async function getCategoriesData(): Promise<CategoryDTO[]> {
   return demoCategories;
 }
 
+export async function getCustomerByIdData(id: string): Promise<CustomerDTO | null> {
+  const db = await getDb();
+
+  if (db) {
+    try {
+      return await db.customer.findUnique({ where: { id } });
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
 export async function getSettingsData(): Promise<StoreSettingDTO> {
   const db = await getDb();
 
@@ -247,12 +262,26 @@ function findDemoVariant(product: ProductDTO, variantId?: string): ProductVarian
   return variant;
 }
 
-export async function createOrderData(input: CreateOrderInput): Promise<OrderDTO> {
+export async function createOrderData(
+  input: CreateOrderInput,
+  customerId: string
+): Promise<OrderDTO> {
   const db = await getDb();
   const settings = await getSettingsData();
 
   if (db) {
     try {
+      await db.customer.update({
+        where: { id: customerId },
+        data: {
+          name: input.customer.name,
+          phone: input.customer.phone,
+          address: input.customer.address,
+          city: input.customer.city,
+          notes: input.customer.notes
+        }
+      });
+
       const productIds = input.items.map((item) => item.productId);
       const products = await db.product.findMany({
         where: { id: { in: productIds } },
@@ -303,13 +332,7 @@ export async function createOrderData(input: CreateOrderInput): Promise<OrderDTO
           shippingCost,
           total,
           customer: {
-            create: {
-              name: input.customer.name,
-              phone: input.customer.phone,
-              address: input.customer.address,
-              city: input.customer.city,
-              notes: input.customer.notes
-            }
+            connect: { id: customerId }
           },
           items: {
             create: items.map((item) => ({
@@ -495,6 +518,26 @@ export async function getOrdersData(): Promise<OrderDTO[]> {
   }
 
   return demoOrders;
+}
+
+export async function getOrdersByCustomerIdData(customerId: string): Promise<OrderDTO[]> {
+  const db = await getDb();
+
+  if (db) {
+    try {
+      const orders = await db.order.findMany({
+        where: { customerId },
+        include: { customer: true, items: true },
+        orderBy: { createdAt: "desc" }
+      });
+
+      return orders.map(orderFromDb);
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
 }
 
 export async function getOrderByIdData(id: string): Promise<OrderDTO | null> {

@@ -72,6 +72,26 @@ const products = [
       { size: "M", color: "Azul", stock: 18, sku: "LL-PPA-M-AZU" },
       { size: "L", color: "Azul", stock: 16, sku: "LL-PPA-L-AZU" }
     ]
+  },
+  {
+    name: "Camisa Lino Arena",
+    slug: "camisa-lino-arena",
+    description: "Camisa ligera con textura natural, pensada para climas calidos y colecciones de temporada.",
+    retailPrice: "430.00",
+    wholesalePrice: "330.00",
+    wholesaleMinQuantity: 6,
+    categorySlug: "basicas",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c",
+        alt: "Camisa lino arena",
+        position: 1
+      }
+    ],
+    variants: [
+      { size: "M", color: "Arena", stock: 7, sku: "LL-CLA-M-ARE" },
+      { size: "L", color: "Arena", stock: 9, sku: "LL-CLA-L-ARE" }
+    ]
   }
 ];
 

@@ -6,6 +6,7 @@ import {
   BarChart3,
   Boxes,
   FolderTree,
+  LogOut,
   Menu,
   Package,
   Settings,
@@ -13,6 +14,7 @@ import {
   X
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/components/providers/auth-provider";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -26,6 +28,7 @@ const links = [
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { logout } = useAuth();
 
   const sidebar = (
     <aside className="flex h-full w-72 flex-col border-r border-[var(--border)] bg-white">
@@ -61,13 +64,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
-      <div className="mt-auto border-t border-[var(--border)] p-4">
+      <div className="mt-auto grid gap-2 border-t border-[var(--border)] p-4">
         <Link
           href="/"
           className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--border)] text-sm font-semibold"
         >
           Ver tienda
         </Link>
+        <button
+          type="button"
+          onClick={() => logout()}
+          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[var(--border)] text-sm font-semibold"
+        >
+          <LogOut size={16} /> Cerrar sesion
+        </button>
       </div>
     </aside>
   );

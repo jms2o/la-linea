@@ -4,7 +4,17 @@ import type {
   ProductDTO,
   StoreSettingDTO
 } from "@/types";
-import type { CreateOrderInput } from "@/lib/validations";
+import type {
+  CreateOrderInput,
+  LoginInput,
+  RegisterCustomerInputPayload
+} from "@/lib/validations";
+
+export type AuthResult = {
+  kind: "admin" | "customer";
+  name: string;
+  redirectTo: string;
+};
 
 type ProductParams = {
   search?: string;
@@ -68,6 +78,34 @@ export function createOrder(data: CreateOrderInput) {
 
 export function getSettings() {
   return request<StoreSettingDTO>("/api/settings");
+}
+
+async function authRequest(path: string, body: unknown): Promise<AuthResult> {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message ?? "No se pudo completar la solicitud.");
+  }
+
+  return data as AuthResult;
+}
+
+export function login(data: LoginInput) {
+  return authRequest("/api/auth/login", data);
+}
+
+export function registerCustomer(data: RegisterCustomerInputPayload) {
+  return authRequest("/api/auth/register", data);
+}
+
+export async function logout(): Promise<void> {
+  await fetch("/api/auth/logout", { method: "POST" });
 }
 
 export function getAdminProducts() {

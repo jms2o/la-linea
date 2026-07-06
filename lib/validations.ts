@@ -20,3 +20,22 @@ export const createOrderInputSchema = z.object({
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderInputSchema>;
+
+export const loginInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6)
+});
+
+export type LoginInput = z.infer<typeof loginInputSchema>;
+
+export const genderInputSchema = z.enum(["MALE", "FEMALE", "OTHER"]);
+
+export const registerCustomerInputSchema = z.object({
+  name: z.string().min(2).max(120),
+  gender: genderInputSchema,
+  phone: z.string().min(7).max(30),
+  email: z.string().email(),
+  password: z.string().min(8).max(72)
+});
+
+export type RegisterCustomerInputPayload = z.infer<typeof registerCustomerInputSchema>;

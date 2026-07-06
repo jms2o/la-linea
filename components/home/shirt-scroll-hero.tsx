@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef, type MutableRefObject } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { motion, useMotionValueEvent, useScroll, useTransform } from "motion/react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -95,7 +95,25 @@ function smoothstep(t: number) {
   return t * t * (3 - 2 * t);
 }
 
+// Below this breakpoint the scroll-jacked 3D hero is skipped entirely (no
+// Canvas/WebGL mounted, not just visually hidden) since it's the heaviest
+// thing on the page and not worth the battery/CPU cost on phones.
+const DESKTOP_QUERY = "(min-width: 768px)";
+
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(DESKTOP_QUERY);
+    const update = () => setIsDesktop(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return isDesktop;
+}
+
 export function ShirtScrollHero({ whatsappHref }: ShirtScrollHeroProps) {
+  const isDesktop = useIsDesktop();
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
   const { scrollYProgress } = useScroll({
@@ -110,29 +128,53 @@ export function ShirtScrollHero({ whatsappHref }: ShirtScrollHeroProps) {
   // through their hold at the right, then starts fading out right as they
   // begin swinging back to the centered row (progress ~0.45, matching
   // HOLD_END_T translated from the shirts' eased "t" back into raw scroll
-  // progress).
-  const textOpacity = useTransform(scrollYProgress, [0, 0.32, 0.45, 0.85], [0, 1, 1, 0]);
-  const textX = useTransform(scrollYProgress, [0, 0.32], [-30, 0]);
+  // progress). On mobile there's no 3D animation driving this, so the text
+  // just stays fully visible instead of tracking scroll progress.
+  const desktopTextOpacity = useTransform(scrollYProgress, [0, 0.32, 0.45, 0.85], [0, 1, 1, 0]);
+  const desktopTextX = useTransform(scrollYProgress, [0, 0.32], [-30, 0]);
 
   return (
-    <section ref={containerRef} id="inicio" className="relative h-[460vh] bg-white">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <div
-          aria-hidden
-          className="float-slow pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[var(--blue)]/20 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="float-slow-delay pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[var(--red)]/20 blur-3xl"
-        />
+    <section
+      ref={containerRef}
+      id="inicio"
+      className={isDesktop ? "relative h-[460vh] bg-white" : "relative bg-white"}
+    >
+      <div
+        className={
+          isDesktop
+            ? "sticky top-0 flex h-screen items-center overflow-hidden"
+            : "flex items-center px-4 py-16 sm:px-6 lg:px-8"
+        }
+      >
+        {isDesktop && (
+          <>
+            <div
+              aria-hidden
+              className="float-slow pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[var(--blue)]/20 blur-3xl"
+            />
+            <div
+              aria-hidden
+              className="float-slow-delay pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[var(--red)]/20 blur-3xl"
+            />
+          </>
+        )}
 
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-start px-4 sm:px-6 lg:px-8">
-          <motion.div style={{ opacity: textOpacity, x: textX }} className="max-w-xl">
+        <div
+          className={
+            isDesktop
+              ? "relative z-10 mx-auto flex w-full max-w-7xl flex-col items-start px-4 sm:px-6 lg:px-8"
+              : "mx-auto w-full max-w-xl"
+          }
+        >
+          <motion.div
+            style={isDesktop ? { opacity: desktopTextOpacity, x: desktopTextX } : undefined}
+            className="max-w-xl"
+          >
             <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-1.5 text-sm font-semibold uppercase tracking-[0.2em] text-black shadow-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--blue)]" />
               Camisas al menudeo y mayoreo
             </span>
-            <h1 className="mt-6 text-5xl font-bold leading-tight tracking-tight sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight sm:text-6xl lg:text-7xl">
               La Linea
             </h1>
             <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
@@ -151,20 +193,22 @@ export function ShirtScrollHero({ whatsappHref }: ShirtScrollHeroProps) {
           </motion.div>
         </div>
 
-        <div className="absolute inset-0">
-          <Canvas camera={{ position: [0, 0, 6.5], fov: 30 }}>
-            <ambientLight intensity={0.75} />
-            <directionalLight position={[3, 4, 5]} intensity={1.2} />
-            <directionalLight position={[-3, -2, 3]} intensity={0.35} />
-            <directionalLight position={[0, 3, -5]} intensity={0.4} />
-            <Suspense fallback={null}>
-              {SHIRT_PLANS.map((plan, index) => (
-                <Shirt3D key={index} index={index} plan={plan} progressRef={progressRef} />
-              ))}
-              <ContactShadows position={[0, -1.4, 0]} opacity={0.3} scale={8} blur={2.4} far={3} />
-            </Suspense>
-          </Canvas>
-        </div>
+        {isDesktop && (
+          <div className="absolute inset-0">
+            <Canvas camera={{ position: [0, 0, 6.5], fov: 30 }}>
+              <ambientLight intensity={0.75} />
+              <directionalLight position={[3, 4, 5]} intensity={1.2} />
+              <directionalLight position={[-3, -2, 3]} intensity={0.35} />
+              <directionalLight position={[0, 3, -5]} intensity={0.4} />
+              <Suspense fallback={null}>
+                {SHIRT_PLANS.map((plan, index) => (
+                  <Shirt3D key={index} index={index} plan={plan} progressRef={progressRef} />
+                ))}
+                <ContactShadows position={[0, -1.4, 0]} opacity={0.3} scale={8} blur={2.4} far={3} />
+              </Suspense>
+            </Canvas>
+          </div>
+        )}
       </div>
     </section>
   );

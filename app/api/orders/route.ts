@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOrderData, getOrdersData } from "@/lib/data";
+import { getSession } from "@/lib/session";
 import { createOrderInputSchema } from "@/lib/validations";
 
 export async function GET() {
@@ -8,6 +9,15 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const session = await getSession();
+
+  if (!session || session.kind !== "customer") {
+    return NextResponse.json(
+      { message: "Debes iniciar sesion para hacer un pedido." },
+      { status: 401 }
+    );
+  }
+
   const body = await request.json();
   const parsed = createOrderInputSchema.safeParse(body);
 
@@ -22,7 +32,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order = await createOrderData(parsed.data);
+    const order = await createOrderData(parsed.data, session.sub);
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     return NextResponse.json(

@@ -75,6 +75,7 @@ export type StoreSettingDTO = {
 export type CustomerDTO = {
   id: string;
   name: string;
+  gender?: "MALE" | "FEMALE" | "OTHER" | null;
   phone: string;
   address?: string | null;
   city?: string | null;

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { SiteShell } from "@/components/layout/site-shell";
+import { AuthProvider } from "@/components/providers/auth-provider";
+import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: {
@@ -18,17 +20,22 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+  const user = session ? { kind: session.kind, name: session.name, email: session.email } : null;
+
   return (
     <html lang="es">
       <body>
-        <CartProvider>
-          <SiteShell>{children}</SiteShell>
-        </CartProvider>
+        <AuthProvider user={user}>
+          <CartProvider>
+            <SiteShell>{children}</SiteShell>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

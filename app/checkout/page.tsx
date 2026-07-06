@@ -1,12 +1,32 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
+import { getCustomerByIdData } from "@/lib/data";
+import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Checkout",
   description: "Confirma tu pedido La Linea y envialo por WhatsApp."
 };
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const session = await getSession();
+
+  if (!session || session.kind !== "customer") {
+    redirect("/login?next=/checkout");
+  }
+
+  const customer = await getCustomerByIdData(session.sub);
+  const initialCustomer = customer
+    ? {
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address ?? "",
+        city: customer.city ?? "",
+        notes: customer.notes ?? ""
+      }
+    : undefined;
+
   return (
     <main className="min-h-screen bg-[var(--background)] py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -22,7 +42,7 @@ export default function CheckoutPage() {
             WhatsApp con productos, variantes y total.
           </p>
         </div>
-        <CheckoutForm />
+        <CheckoutForm initialCustomer={initialCustomer} />
       </div>
     </main>
   );
