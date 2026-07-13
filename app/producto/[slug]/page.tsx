@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductDetail } from "@/components/product/product-detail";
-import {
-  getProductBySlugData,
-  getProductsData,
-  getSettingsData
-} from "@/lib/data";
+import { getProductBySlugData, getProductsData } from "@/lib/data";
 
 type PageProps = {
   params: Promise<{
@@ -37,9 +33,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
-  const [product, settings, products] = await Promise.all([
+  const [product, products] = await Promise.all([
     getProductBySlugData(slug),
-    getSettingsData(),
     getProductsData({ activeOnly: true })
   ]);
 
@@ -54,7 +49,7 @@ export default async function ProductPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-[var(--background)] py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <ProductDetail product={product} settings={settings} />
+        <ProductDetail product={product} />
         {related.length ? (
           <section className="mt-16">
             <h2 className="text-2xl font-semibold tracking-normal">

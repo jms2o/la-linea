@@ -264,23 +264,29 @@ function findDemoVariant(product: ProductDTO, variantId?: string): ProductVarian
 
 export async function createOrderData(
   input: CreateOrderInput,
-  customerId: string
+  customerId: string,
+  sessionCustomer: { name: string; email: string }
 ): Promise<OrderDTO> {
   const db = await getDb();
   const settings = await getSettingsData();
 
   if (db) {
     try {
-      await db.customer.update({
-        where: { id: customerId },
-        data: {
-          name: input.customer.name,
-          phone: input.customer.phone,
-          address: input.customer.address,
-          city: input.customer.city,
-          notes: input.customer.notes
-        }
-      });
+      await db.customer.findUniqueOrThrow({ where: { id: customerId } });
+
+      if (input.deliveryMethod === "A domicilio" && input.address) {
+        await db.customer.update({
+          where: { id: customerId },
+          data: {
+            address: input.address,
+            neighborhood: input.neighborhood,
+            city: input.city,
+            state: input.state,
+            zipCode: input.zipCode,
+            reference: input.reference
+          }
+        });
+      }
 
       const productIds = input.items.map((item) => item.productId);
       const products = await db.product.findMany({
@@ -325,9 +331,9 @@ export async function createOrderData(
         data: {
           orderNumber: `LL-${Date.now()}`,
           status: "PENDING",
-          paymentStatus: "NOT_REQUIRED",
+          paymentStatus: resolvePaymentStatus(input.paymentMethod),
+          paymentMethod: input.paymentMethod,
           deliveryMethod: input.deliveryMethod,
-          notes: input.notes,
           subtotal,
           shippingCost,
           total,
@@ -356,16 +362,21 @@ export async function createOrderData(
       const dto = orderFromDb(order);
       return attachWhatsApp(dto, settings);
     } catch {
-      return createDemoOrder(input, settings);
+      return createDemoOrder(input, settings, sessionCustomer);
     }
   }
 
-  return createDemoOrder(input, settings);
+  return createDemoOrder(input, settings, sessionCustomer);
+}
+
+function resolvePaymentStatus(paymentMethod: CreateOrderInput["paymentMethod"]): "PENDING" | "NOT_REQUIRED" {
+  return paymentMethod === "CARD" ? "PENDING" : "NOT_REQUIRED";
 }
 
 function createDemoOrder(
   input: CreateOrderInput,
-  settings: StoreSettingDTO
+  settings: StoreSettingDTO,
+  sessionCustomer: { name: string; email: string }
 ): OrderDTO {
   const items = input.items.map((item, index) => {
     const product =
@@ -394,19 +405,24 @@ function createDemoOrder(
     orderNumber: `LL-DEMO-${Date.now()}`,
     customer: {
       id: `demo-customer-${Date.now()}`,
-      name: input.customer.name,
-      phone: input.customer.phone,
-      address: input.customer.address,
-      city: input.customer.city,
-      notes: input.customer.notes
+      name: sessionCustomer.name,
+      phone: "",
+      address: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      zipCode: null,
+      reference: null,
+      notes: null
     },
     status: "PENDING",
     subtotal,
     shippingCost,
     total: subtotal + shippingCost,
-    paymentStatus: "NOT_REQUIRED",
+    paymentStatus: resolvePaymentStatus(input.paymentMethod),
+    paymentMethod: input.paymentMethod,
     deliveryMethod: input.deliveryMethod,
-    notes: input.notes,
+    notes: null,
     items,
     createdAt: new Date().toISOString()
   };
@@ -422,6 +438,7 @@ function orderFromDb(order: {
   shippingCost: { toNumber(): number };
   total: { toNumber(): number };
   paymentStatus: string;
+  paymentMethod: string;
   deliveryMethod: string;
   notes: string | null;
   createdAt: Date;
@@ -430,7 +447,11 @@ function orderFromDb(order: {
     name: string;
     phone: string;
     address: string | null;
+    neighborhood: string | null;
     city: string | null;
+    state: string | null;
+    zipCode: string | null;
+    reference: string | null;
     notes: string | null;
   };
   items: Array<{
@@ -448,12 +469,24 @@ function orderFromDb(order: {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
-    customer: order.customer,
+    customer: {
+      id: order.customer.id,
+      name: order.customer.name,
+      phone: order.customer.phone,
+      address: order.customer.address,
+      neighborhood: order.customer.neighborhood,
+      city: order.customer.city,
+      state: order.customer.state,
+      zipCode: order.customer.zipCode,
+      reference: order.customer.reference,
+      notes: order.customer.notes
+    },
     status: order.status,
     subtotal: order.subtotal.toNumber(),
     shippingCost: order.shippingCost.toNumber(),
     total: order.total.toNumber(),
     paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
     notes: order.notes,
     items: order.items.map((item) => ({
@@ -476,9 +509,14 @@ function attachWhatsApp(order: OrderDTO, settings: StoreSettingDTO): OrderDTO {
     customerName: order.customer.name,
     phone: order.customer.phone,
     address: order.customer.address,
+    neighborhood: order.customer.neighborhood,
     city: order.customer.city,
+    state: order.customer.state,
+    zipCode: order.customer.zipCode,
+    reference: order.customer.reference,
     notes: order.notes ?? order.customer.notes,
     deliveryMethod: order.deliveryMethod,
+    paymentMethod: order.paymentMethod,
     items: order.items.map((item) => ({
       productName: item.productName,
       size: item.size,
@@ -557,4 +595,28 @@ export async function getOrderByIdData(id: string): Promise<OrderDTO | null> {
   }
 
   return demoOrders.find((order) => order.id === id) ?? null;
+}
+
+export async function updateOrderStatusData(
+  id: string,
+  status: OrderDTO["status"]
+): Promise<OrderDTO | null> {
+  const db = await getDb();
+
+  if (!db) {
+    return null;
+  }
+
+  try {
+    const settings = await getSettingsData();
+    const order = await db.order.update({
+      where: { id },
+      data: { status },
+      include: { customer: true, items: true }
+    });
+
+    return attachWhatsApp(orderFromDb(order), settings);
+  } catch {
+    return null;
+  }
 }

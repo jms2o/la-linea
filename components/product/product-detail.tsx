@@ -1,18 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { MessageCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Zap } from "lucide-react";
+import { useState } from "react";
 import { AddToCartButton } from "@/components/product/add-to-cart-button";
 import { ProductSpinViewer } from "@/components/product/product-spin-viewer";
 import { QuantitySelector } from "@/components/cart/quantity-selector";
+import { useCart } from "@/components/cart/cart-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 import { calculateLineSubtotal, calculateUnitPrice } from "@/lib/pricing";
 import { formatCurrency } from "@/lib/format";
 import { getProductSpinColor } from "@/lib/product-spin";
 import { cn } from "@/lib/utils";
-import { buildWhatsAppOrderMessage, buildWhatsAppOrderUrl } from "@/lib/whatsapp";
-import type { ProductDTO, StoreSettingDTO } from "@/types";
+import type { ProductDTO } from "@/types";
 
 const DETAIL_IMAGE_LABELS = [
   "Principal",
@@ -23,13 +24,11 @@ const DETAIL_IMAGE_LABELS = [
   "Empaque"
 ];
 
-export function ProductDetail({
-  product,
-  settings
-}: {
-  product: ProductDTO;
-  settings: StoreSettingDTO;
-}) {
+export function ProductDetail({ product }: { product: ProductDTO }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { addItem } = useCart();
+  const { user } = useAuth();
   const [selectedImage, setSelectedImage] = useState(product.images[0]?.url);
   const [variantId, setVariantId] = useState(product.variants[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
@@ -41,30 +40,19 @@ export function ProductDetail({
   const neededForWholesale = Math.max(product.wholesaleMinQuantity - quantity, 0);
   const spinColor = getProductSpinColor(product.name, variant?.color);
 
-  const whatsappUrl = useMemo(() => {
-    if (!settings.whatsappNumber || !variant) {
-      return null;
+  function handleBuyNow() {
+    if (!user) {
+      router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      return;
     }
 
-    const message = buildWhatsAppOrderMessage({
-      customerName: "Cliente",
-      items: [
-        {
-          productName: product.name,
-          size: variant.size,
-          color: variant.color,
-          quantity,
-          unitPrice,
-          subtotal
-        }
-      ],
-      subtotal,
-      shippingCost: settings.shippingCost,
-      total: subtotal + settings.shippingCost
-    });
+    if (!variant) {
+      return;
+    }
 
-    return buildWhatsAppOrderUrl(settings.whatsappNumber, message);
-  }, [product.name, quantity, settings.shippingCost, settings.whatsappNumber, subtotal, unitPrice, variant]);
+    addItem({ product, variant, quantity });
+    router.push("/checkout");
+  }
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr]">
@@ -196,13 +184,13 @@ export function ProductDetail({
           {variant ? (
             <AddToCartButton product={product} variant={variant} quantity={quantity} />
           ) : null}
-          <Link
-            href={whatsappUrl ?? "/checkout"}
-            target={whatsappUrl ? "_blank" : undefined}
+          <button
+            type="button"
+            onClick={handleBuyNow}
             className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-[var(--primary)] bg-white px-5 text-sm font-semibold text-[var(--primary)] transition hover:bg-[#F3F4F6]"
           >
-            <MessageCircle size={18} /> Comprar por WhatsApp
-          </Link>
+            <Zap size={18} /> Comprar ahora
+          </button>
         </div>
       </section>
     </div>

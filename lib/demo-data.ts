@@ -145,6 +145,7 @@ export const demoOrders: OrderDTO[] = [
     shippingCost: 0,
     total: 1920,
     paymentStatus: "NOT_REQUIRED",
+    paymentMethod: "WHATSAPP",
     deliveryMethod: "WhatsApp",
     notes: "Confirmar colores disponibles.",
     items: [

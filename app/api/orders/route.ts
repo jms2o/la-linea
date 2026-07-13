@@ -4,6 +4,12 @@ import { getSession } from "@/lib/session";
 import { createOrderInputSchema } from "@/lib/validations";
 
 export async function GET() {
+  const session = await getSession();
+
+  if (!session || session.kind !== "admin") {
+    return NextResponse.json({ message: "No autorizado." }, { status: 401 });
+  }
+
   const orders = await getOrdersData();
   return NextResponse.json(orders);
 }
@@ -32,7 +38,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order = await createOrderData(parsed.data, session.sub);
+    const order = await createOrderData(parsed.data, session.sub, {
+      name: session.name,
+      email: session.email
+    });
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     return NextResponse.json(

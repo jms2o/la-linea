@@ -78,7 +78,11 @@ export type CustomerDTO = {
   gender?: "MALE" | "FEMALE" | "OTHER" | null;
   phone: string;
   address?: string | null;
+  neighborhood?: string | null;
   city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+  reference?: string | null;
   notes?: string | null;
 };
 
@@ -89,6 +93,8 @@ export type OrderStatusDTO =
   | "SHIPPED"
   | "DELIVERED"
   | "CANCELLED";
+
+export const CUSTOMER_CANCELLABLE_STATUSES: OrderStatusDTO[] = ["PENDING", "CONFIRMED"];
 
 export type OrderItemDTO = {
   id: string;
@@ -111,6 +117,7 @@ export type OrderDTO = {
   shippingCost: number;
   total: number;
   paymentStatus: string;
+  paymentMethod: string;
   deliveryMethod: string;
   notes?: string | null;
   items: OrderItemDTO[];

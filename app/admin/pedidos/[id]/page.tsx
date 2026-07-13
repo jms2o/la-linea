@@ -80,8 +80,26 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               </div>
               <div>
                 <dt className="text-[var(--muted)]">Direccion</dt>
-                <dd className="font-medium">{order.customer.address ?? "Sin direccion"}</dd>
+                <dd className="font-medium">
+                  {order.customer.address
+                    ? [
+                        order.customer.address,
+                        order.customer.neighborhood,
+                        order.customer.city,
+                        order.customer.state,
+                        order.customer.zipCode
+                      ]
+                        .filter(Boolean)
+                        .join(", ")
+                    : "Sin direccion"}
+                </dd>
               </div>
+              {order.customer.reference ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Referencias</dt>
+                  <dd className="font-medium">{order.customer.reference}</dd>
+                </div>
+              ) : null}
             </dl>
           </section>
           <section className="rounded-lg border border-[var(--border)] bg-white p-5">

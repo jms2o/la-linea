@@ -12,6 +12,7 @@ type AnimatedButtonProps = {
   children: ReactNode;
   variant?: "solid" | "outline" | "invert" | "whatsapp";
   className?: string;
+  target?: string;
 };
 
 const VARIANT_STYLES: Record<
@@ -48,13 +49,15 @@ export function AnimatedButton({
   href,
   children,
   variant = "solid",
-  className
+  className,
+  target
 }: AnimatedButtonProps) {
   const styles = VARIANT_STYLES[variant];
 
   return (
     <MotionLink
       href={href}
+      target={target}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.96 }}
       transition={{ type: "spring", stiffness: 420, damping: 26 }}

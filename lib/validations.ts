@@ -6,20 +6,52 @@ export const orderItemInputSchema = z.object({
   quantity: z.number().int().positive()
 });
 
-export const createOrderInputSchema = z.object({
-  customer: z.object({
-    name: z.string().min(2).max(120),
-    phone: z.string().min(7).max(30),
+export const deliveryOptionSchema = z.enum(["Recoger en tienda", "A domicilio"]);
+
+export type DeliveryOption = z.infer<typeof deliveryOptionSchema>;
+
+export const paymentMethodSchema = z.enum(["WHATSAPP", "CARD"]);
+
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+
+export const createOrderInputSchema = z
+  .object({
+    deliveryMethod: deliveryOptionSchema,
+    paymentMethod: paymentMethodSchema,
     address: z.string().max(240).optional(),
+    neighborhood: z.string().max(120).optional(),
     city: z.string().max(120).optional(),
-    notes: z.string().max(500).optional()
-  }),
-  deliveryMethod: z.string().min(2).max(80),
-  notes: z.string().max(500).optional(),
-  items: z.array(orderItemInputSchema).min(1)
-});
+    state: z.string().max(120).optional(),
+    zipCode: z.string().max(10).optional(),
+    reference: z.string().max(240).optional(),
+    items: z.array(orderItemInputSchema).min(1)
+  })
+  .refine(
+    (data) =>
+      data.deliveryMethod !== "A domicilio" ||
+      [data.address, data.neighborhood, data.city, data.state, data.zipCode].every((field) =>
+        Boolean(field?.trim())
+      ),
+    {
+      message: "Completa todos los datos de envio para entrega a domicilio.",
+      path: ["address"]
+    }
+  );
 
 export type CreateOrderInput = z.infer<typeof createOrderInputSchema>;
+
+export const orderStatusSchema = z.enum([
+  "PENDING",
+  "CONFIRMED",
+  "PREPARING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED"
+]);
+
+export const updateOrderStatusInputSchema = z.object({
+  status: orderStatusSchema
+});
 
 export const loginInputSchema = z.object({
   email: z.string().email(),

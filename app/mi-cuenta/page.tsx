@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Package } from "lucide-react";
+import { CancelOrderButton } from "@/components/account/cancel-order-button";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { getOrdersByCustomerIdData } from "@/lib/data";
 import { getSession } from "@/lib/session";
+import { CUSTOMER_CANCELLABLE_STATUSES } from "@/types";
 
 export const metadata: Metadata = {
   title: "Mi cuenta",
@@ -80,6 +82,9 @@ export default async function MiCuentaPage() {
                     </li>
                   ))}
                 </ul>
+                {CUSTOMER_CANCELLABLE_STATUSES.includes(order.status) ? (
+                  <CancelOrderButton orderId={order.id} />
+                ) : null}
               </div>
             ))
           )}

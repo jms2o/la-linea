@@ -11,9 +11,14 @@ type WhatsAppOrder = {
   customerName: string;
   phone?: string | null;
   address?: string | null;
+  neighborhood?: string | null;
   city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+  reference?: string | null;
   notes?: string | null;
   deliveryMethod?: string | null;
+  paymentMethod?: string | null;
   items: WhatsAppOrderItem[];
   subtotal: number;
   shippingCost: number;
@@ -27,15 +32,29 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  WHATSAPP: "Coordinar por WhatsApp",
+  CARD: "Tarjeta (pendiente de cobro)"
+};
+
 export function buildWhatsAppOrderMessage(order: WhatsAppOrder): string {
+  const paymentLabel = order.paymentMethod
+    ? PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod
+    : null;
+
   const lines = [
     "Nuevo pedido",
     "",
     `Cliente: ${order.customerName}`,
     order.phone ? `Telefono: ${order.phone}` : null,
     order.deliveryMethod ? `Metodo de entrega: ${order.deliveryMethod}` : null,
+    paymentLabel ? `Metodo de pago: ${paymentLabel}` : null,
     order.address ? `Direccion: ${order.address}` : null,
+    order.neighborhood ? `Colonia: ${order.neighborhood}` : null,
     order.city ? `Ciudad: ${order.city}` : null,
+    order.state ? `Estado: ${order.state}` : null,
+    order.zipCode ? `Codigo postal: ${order.zipCode}` : null,
+    order.reference ? `Referencias: ${order.reference}` : null,
     "",
     "Productos:",
     ...order.items.map((item, index) => {

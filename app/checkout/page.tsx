@@ -17,32 +17,22 @@ export default async function CheckoutPage() {
   }
 
   const customer = await getCustomerByIdData(session.sub);
-  const initialCustomer = customer
-    ? {
-        name: customer.name,
-        phone: customer.phone,
-        address: customer.address ?? "",
-        city: customer.city ?? "",
-        notes: customer.notes ?? ""
-      }
-    : undefined;
 
   return (
     <main className="min-h-screen bg-[var(--background)] py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-            Checkout
-          </p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-normal">
-            Confirma tu pedido
-          </h1>
-          <p className="mt-4 text-base leading-7 text-[var(--muted)]">
-            Completa tus datos para guardar el pedido y generar el mensaje de
-            WhatsApp con productos, variantes y total.
-          </p>
-        </div>
-        <CheckoutForm initialCustomer={initialCustomer} />
+        <CheckoutForm
+          customer={{
+            name: customer?.name ?? session.name,
+            phone: customer?.phone ?? "",
+            address: customer?.address ?? null,
+            neighborhood: customer?.neighborhood ?? null,
+            city: customer?.city ?? null,
+            state: customer?.state ?? null,
+            zipCode: customer?.zipCode ?? null,
+            reference: customer?.reference ?? null
+          }}
+        />
       </div>
     </main>
   );
